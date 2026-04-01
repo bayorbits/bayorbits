@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bay Orbits — Particle Text</title>
+    <meta
+      name="description"
+      content="Interactive particle text demo for Bay Orbits rendered with HTML5 canvas and vanilla JavaScript."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar" aria-label="Page title">
+      <h1>Bay Orbits</h1>
+    </header>
+
+    <main class="layout">
+      <section class="panel" aria-label="Controls">
+        <h2>Particle Text Demo</h2>
+        <p>
+          Type text below to reshape the particles. Move your cursor (or drag on touch)
+          near the text to disperse particles.
+        </p>
+        <label for="messageInput">Display text</label>
+        <textarea id="messageInput" rows="3">It's never just black or white.</textarea>
+
+        <div class="inline-controls">
+          <label for="gapInput">Density</label>
+          <input id="gapInput" type="range" min="3" max="14" value="6" step="1" />
+          <span id="densityLabel" aria-live="polite">6</span>
+        </div>
+      </section>
+
+      <section class="canvas-shell" aria-label="Particle canvas area">
+        <canvas id="particleCanvas" role="img" aria-label="Interactive particle text animation"></canvas>
+      </section>
+    </main>
+
+    <noscript>
+      <section class="noscript-message">
+        <h2>Bay Orbits</h2>
+        <p>
+          It's never just black or white. This demo uses JavaScript to transform text into
+          interactive particles.
+        </p>
+      </section>
+    </noscript>
+
+    <script src="script.js"></script>
+  </body>
+</html>

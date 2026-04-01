@@ -1,0 +1,153 @@
+:root {
+  --bg: #050505;
+  --text: #f5f5f5;
+  --muted: #bebebe;
+  --panel: rgba(255, 255, 255, 0.06);
+  --panel-border: rgba(255, 255, 255, 0.2);
+  --accent: #ffffff;
+  --shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  padding: 1rem 1.25rem 0.25rem;
+}
+
+.topbar h1 {
+  margin: 0;
+  letter-spacing: 0.08em;
+  font-size: clamp(1.2rem, 2vw, 1.65rem);
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(240px, 340px) minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0.75rem 1.25rem 1.25rem;
+}
+
+.panel {
+  align-self: start;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.panel h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.panel p {
+  margin: 0 0 0.85rem;
+  color: var(--muted);
+  line-height: 1.4;
+  font-size: 0.92rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--panel-border);
+  background: rgba(0, 0, 0, 0.45);
+  color: var(--text);
+  font: inherit;
+  line-height: 1.35;
+  padding: 0.7rem 0.75rem;
+  resize: vertical;
+  min-height: 5.4rem;
+}
+
+.inline-controls {
+  margin-top: 0.85rem;
+  display: grid;
+  gap: 0.35rem;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+}
+
+input[type='range'] {
+  width: 100%;
+}
+
+#densityLabel {
+  min-width: 1.5ch;
+  text-align: right;
+  color: var(--text);
+}
+
+.canvas-shell {
+  border-radius: 14px;
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--shadow);
+  background: radial-gradient(circle at 45% 35%, rgba(255, 255, 255, 0.04), transparent 45%);
+  min-height: 60vh;
+  overflow: hidden;
+  position: relative;
+}
+
+#particleCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.noscript-message {
+  margin: 1rem 1.25rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 1rem;
+  background: var(--panel);
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    order: 2;
+  }
+
+  .canvas-shell {
+    min-height: 52vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .canvas-shell {
+    transition: none;
+  }
+}
