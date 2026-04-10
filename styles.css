@@ -60,6 +60,32 @@ body {
   padding: 14px;
 }
 
+
+.settings-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.settings-close-btn {
+  display: none;
+}
+
+.settings-intro {
+  margin-top: 8px;
+}
+
+.settings-section {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(150, 169, 223, 0.16);
+}
+
+.kv-list.compact {
+  gap: 4px;
+}
+
 .settings-panel h2,
 .settings-panel h3 {
   margin: 0 0 8px;
@@ -241,6 +267,11 @@ body {
   inset: 0;
   margin: 0;
   border-radius: 0;
+  padding-top: 10px;
+}
+
+.ui-root.vertical.settings-open .settings-close-btn {
+  display: inline-flex;
 }
 
 .ui-root.vertical.settings-open .chat-panel,

@@ -1,6 +1,6 @@
 import { createInitialState } from "./state.js";
 import { detectOrientation, buildLayoutContext, applyLayoutToDom, updateVerticalSplitFromClientY } from "./layout.js";
-import { renderSettings } from "./settingsSystem.js";
+import { renderSettings, updateSettingsStatus } from "./settingsSystem.js";
 import { startLesson, continueLesson, renderChatLog, resetLesson } from "./chatSystem.js";
 import { buildTokenUnits } from "./promptProcessor.js";
 import { buildPromptGeometry } from "./geometryBuilder.js";
@@ -41,7 +41,7 @@ function resizeCanvas() {
 
 function syncLayout() {
   state.orientationMode = detectOrientation();
-  state.layoutContext = buildLayoutContext(state);
+  state.layoutContext = buildLayoutContext(state, dom);
   applyLayoutToDom(state, dom);
 }
 
@@ -50,15 +50,16 @@ function syncUi() {
   dom.continueBtn.disabled = !state.lessonInProgress;
   dom.pauseBtn.textContent = state.animationRunning ? "Pause" : "Resume";
   dom.settingsToggle.setAttribute("aria-expanded", String(state.settingsOpen));
+  updateSettingsStatus(dom.settingsPanel, state);
 }
 
 function beginRunFromPrompt() {
   const didStart = startLesson(state, dom.promptInput.value);
   if (!didStart) return;
 
-  const tokens = buildTokenUnits(state.currentPromptText);
-  state.layoutContext = buildLayoutContext(state);
-  state.promptGeometry = buildPromptGeometry(tokens, state.layoutContext);
+  const tokenUnits = buildTokenUnits(state.currentPromptText);
+  state.layoutContext = buildLayoutContext(state, dom);
+  state.promptGeometry = buildPromptGeometry(tokenUnits, state.layoutContext);
   state.animationRunning = true;
   startStages(state);
 
@@ -111,10 +112,22 @@ function animateFrame(now) {
 }
 
 function bindEvents() {
-  window.addEventListener("resize", syncLayout);
+  window.addEventListener("resize", () => {
+    syncLayout();
+    syncUi();
+  });
 
   dom.settingsToggle.addEventListener("click", () => {
     state.settingsOpen = !state.settingsOpen;
+    syncLayout();
+    syncUi();
+  });
+
+  dom.settingsPanel.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    if (target.id !== "settings-close-btn") return;
+    state.settingsOpen = false;
     syncLayout();
     syncUi();
   });
@@ -150,10 +163,12 @@ function bindEvents() {
     if (event.key === "ArrowUp") {
       state.verticalSplitRatio = Math.max(0.25, state.verticalSplitRatio - 0.03);
       syncLayout();
+      syncUi();
     }
     if (event.key === "ArrowDown") {
       state.verticalSplitRatio = Math.min(0.75, state.verticalSplitRatio + 0.03);
       syncLayout();
+      syncUi();
     }
   });
 }
