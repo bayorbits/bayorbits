@@ -10,7 +10,7 @@ function mixNodePosition(node, stage, stageProgress, time) {
   switch (stage) {
     case "prompt":
       return { x: node.seedX + breath, y: node.seedY + breath };
-    case "tokenize": {
+    case "token": {
       const ringX = node.seedX + Math.cos(node.id) * 0.08;
       const ringY = node.seedY + Math.sin(node.id) * 0.08;
       return {

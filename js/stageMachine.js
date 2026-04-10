@@ -1,9 +1,9 @@
-import { stageOrder } from "./copyRegistry.js";
-
 const stageDuration = {
   idle: Infinity,
+  acknowledgement: 1200,
+  "simulation-note": 1200,
   prompt: 1600,
-  tokenize: 1700,
+  token: 1700,
   projection: 1900,
   transformation: 2400,
   context: 2200,
@@ -11,8 +11,15 @@ const stageDuration = {
 };
 
 export function startStages(state) {
-  state.currentAnimationStage = "prompt";
+  state.currentAnimationStage = "acknowledgement";
   state.stageElapsedMs = 0;
+}
+
+export function setStage(state, stage) {
+  if (!stage || state.currentAnimationStage === stage) return;
+  state.currentAnimationStage = stage;
+  state.stageElapsedMs = 0;
+  state.animationRunning = true;
 }
 
 export function tickStages(state, dt) {
@@ -22,19 +29,10 @@ export function tickStages(state, dt) {
   const duration = stageDuration[stage] ?? 2000;
   state.stageElapsedMs += dt;
 
-  if (state.stageElapsedMs < duration) return;
-
-  if (stage === "response") {
+  if (state.stageElapsedMs >= duration) {
     state.stageElapsedMs = duration;
-    state.animationRunning = false;
-    return;
+    if (stage === "response") state.animationRunning = false;
   }
-
-  const idx = stageOrder.indexOf(stage);
-  const next = stageOrder[Math.min(idx + 1, stageOrder.length - 1)];
-
-  state.currentAnimationStage = next;
-  state.stageElapsedMs = 0;
 }
 
 export function getStageProgress(state) {

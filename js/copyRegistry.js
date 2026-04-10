@@ -1,10 +1,44 @@
-export const teachingSequence = [
-  "A prompt is the starting instruction. It is the text that sets the direction for the model-like process shown in this simulation.",
-  "The prompt is split into token-like pieces, which are small chunks of text that can be handled as units.",
-  "Projection is a mapping step: those units are placed into a shared visual field so relationships can be compared.",
-  "Transformation then reshapes positions through repeated operations, like passing through layers in a matrix-like system.",
-  "Context or influence appears as links between units, where nearby or relevant pieces affect each other over time.",
-  "Response formation is the final stage, where the transformed pattern converges into a structured output shape."
+export const lessonSteps = [
+  {
+    id: "acknowledgement",
+    stage: "acknowledgement",
+    text: "Thanks for the prompt. We will walk through one short concept at a time."
+  },
+  {
+    id: "simulation-note",
+    stage: "simulation-note",
+    text: "Note: this chat is simulated and pre-recorded for learning."
+  },
+  {
+    id: "prompt",
+    stage: "prompt",
+    text: "Prompt stage: your instruction sets the direction for the process."
+  },
+  {
+    id: "token",
+    stage: "token",
+    text: "Token stage: the prompt is split into small token-like units."
+  },
+  {
+    id: "projection",
+    stage: "projection",
+    text: "Projection stage: those units are mapped into a shared visual space."
+  },
+  {
+    id: "transformation",
+    stage: "transformation",
+    text: "Transformation stage: repeated operations shift unit positions."
+  },
+  {
+    id: "context",
+    stage: "context",
+    text: "Context stage: links show how units influence each other."
+  },
+  {
+    id: "response",
+    stage: "response",
+    text: "Response stage: the final pattern gathers into an output shape."
+  }
 ];
 
 export const referenceCopy = {
@@ -19,8 +53,10 @@ export const referenceCopy = {
 
 export const stageOrder = [
   "idle",
+  "acknowledgement",
+  "simulation-note",
   "prompt",
-  "tokenize",
+  "token",
   "projection",
   "transformation",
   "context",
