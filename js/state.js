@@ -1,4 +1,5 @@
 export function createInitialState() {
+  const welcomeText = "Welcome. This is a calm learning simulation with short guided steps.";
   return {
     orientationMode: "horizontal",
     settingsOpen: false,
@@ -10,9 +11,13 @@ export function createInitialState() {
     chatEntries: [
       {
         role: "assistant",
-        text: "Welcome. This is an educational simulation with pre-authored teaching responses and a metaphorical visualization."
+        text: welcomeText,
+        revealIndex: welcomeText.length,
+        visibleText: welcomeText,
+        streaming: false
       }
     ],
+    streamCharsPerSecond: 140,
     animationRunning: true,
     currentAnimationStage: "idle",
     stageElapsedMs: 0,

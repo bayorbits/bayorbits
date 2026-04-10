@@ -1,7 +1,24 @@
-import { teachingSequence } from "./copyRegistry.js";
+import { lessonSteps } from "./copyRegistry.js";
+import { setStage } from "./stageMachine.js";
 
 function createEntry(role, text) {
+  if (role === "assistant") {
+    return { role, text, revealIndex: 0, visibleText: "", streaming: true };
+  }
   return { role, text };
+}
+
+function revealEntryInstantly(entry) {
+  if (entry.role !== "assistant") return;
+  entry.revealIndex = entry.text.length;
+  entry.visibleText = entry.text;
+  entry.streaming = false;
+}
+
+function addAssistantStep(state, step) {
+  const entry = createEntry("assistant", step.text);
+  state.chatEntries.push(entry);
+  setStage(state, step.stage);
 }
 
 export function startLesson(state, promptText) {
@@ -13,14 +30,7 @@ export function startLesson(state, promptText) {
   state.lessonInProgress = true;
 
   state.chatEntries.push(createEntry("user", trimmed));
-  state.chatEntries.push(createEntry("assistant", `Thanks for your prompt: “${trimmed}.”`));
-  state.chatEntries.push(
-    createEntry(
-      "assistant",
-      "This response is simulated and pre-recorded for teaching, not live model inference."
-    )
-  );
-  state.chatEntries.push(createEntry("assistant", teachingSequence[0]));
+  addAssistantStep(state, lessonSteps[0]);
   return true;
 }
 
@@ -28,19 +38,30 @@ export function continueLesson(state) {
   if (!state.lessonInProgress) return false;
   const next = state.currentLessonIndex + 1;
 
-  if (next >= teachingSequence.length) {
+  if (next >= lessonSteps.length) {
     state.lessonInProgress = false;
-    state.chatEntries.push(
-      createEntry(
-        "assistant",
-        "Sequence complete. You can submit another prompt to restart the guided simulation."
-      )
-    );
+    const done = createEntry("assistant", "Lesson complete. Submit a new prompt to run again.");
+    revealEntryInstantly(done);
+    state.chatEntries.push(done);
     return false;
   }
 
   state.currentLessonIndex = next;
-  state.chatEntries.push(createEntry("assistant", teachingSequence[next]));
+  addAssistantStep(state, lessonSteps[next]);
+  return true;
+}
+
+export function updateChatStreaming(state, dt) {
+  const activeEntry = state.chatEntries.find((entry) => entry.role === "assistant" && entry.streaming);
+  if (!activeEntry) return false;
+
+  const chars = Math.max(1, Math.floor((state.streamCharsPerSecond * dt) / 1000));
+  const nextIndex = Math.min(activeEntry.text.length, activeEntry.revealIndex + chars);
+  if (nextIndex === activeEntry.revealIndex) return false;
+
+  activeEntry.revealIndex = nextIndex;
+  activeEntry.visibleText = activeEntry.text.slice(0, nextIndex);
+  if (nextIndex >= activeEntry.text.length) activeEntry.streaming = false;
   return true;
 }
 
@@ -55,7 +76,7 @@ export function renderChatLog(chatLog, entries) {
     role.textContent = entry.role;
 
     const text = document.createElement("p");
-    text.textContent = entry.text;
+    text.textContent = entry.role === "assistant" ? entry.visibleText ?? entry.text : entry.text;
 
     wrapper.append(role, text);
     chatLog.appendChild(wrapper);
@@ -64,13 +85,17 @@ export function renderChatLog(chatLog, entries) {
 }
 
 export function resetLesson(state) {
+  const resetText = "Reset complete. Enter a prompt to run the guided sequence again.";
   state.currentPromptText = "";
   state.currentLessonIndex = -1;
   state.lessonInProgress = false;
   state.chatEntries = [
     {
       role: "assistant",
-      text: "Reset complete. Enter a prompt to run the guided sequence again."
+      text: resetText,
+      revealIndex: resetText.length,
+      visibleText: resetText,
+      streaming: false
     }
   ];
 }

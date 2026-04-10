@@ -1,7 +1,7 @@
 import { createInitialState } from "./state.js";
 import { detectOrientation, buildLayoutContext, applyLayoutToDom, updateVerticalSplitFromClientY } from "./layout.js";
 import { renderSettings, updateSettingsStatus } from "./settingsSystem.js";
-import { startLesson, continueLesson, renderChatLog, resetLesson } from "./chatSystem.js";
+import { startLesson, continueLesson, renderChatLog, resetLesson, updateChatStreaming } from "./chatSystem.js";
 import { buildTokenUnits } from "./promptProcessor.js";
 import { buildPromptGeometry } from "./geometryBuilder.js";
 import { startStages, tickStages } from "./stageMachine.js";
@@ -47,7 +47,8 @@ function syncLayout() {
 
 function syncUi() {
   renderChatLog(dom.chatLog, state.chatEntries);
-  dom.continueBtn.disabled = !state.lessonInProgress;
+  const assistantStreaming = state.chatEntries.some((entry) => entry.role === "assistant" && entry.streaming);
+  dom.continueBtn.disabled = !state.lessonInProgress || assistantStreaming;
   dom.pauseBtn.textContent = state.animationRunning ? "Pause" : "Resume";
   dom.settingsToggle.setAttribute("aria-expanded", String(state.settingsOpen));
   updateSettingsStatus(dom.settingsPanel, state);
@@ -105,8 +106,10 @@ function animateFrame(now) {
   lastTick = now;
 
   tickStages(state, dt);
+  const didStreamUpdate = updateChatStreaming(state, dt);
   const frame = computeFrame(state, now);
   renderFrame(ctx, dom.canvas, frame, state.layoutContext, now);
+  if (didStreamUpdate) syncUi();
 
   requestAnimationFrame(animateFrame);
 }
