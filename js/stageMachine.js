@@ -24,15 +24,17 @@ export function tickStages(state, dt) {
 
   if (state.stageElapsedMs < duration) return;
 
+  if (stage === "response") {
+    state.stageElapsedMs = duration;
+    state.animationRunning = false;
+    return;
+  }
+
   const idx = stageOrder.indexOf(stage);
   const next = stageOrder[Math.min(idx + 1, stageOrder.length - 1)];
 
   state.currentAnimationStage = next;
   state.stageElapsedMs = 0;
-
-  if (next === "response") {
-    state.animationRunning = false;
-  }
 }
 
 export function getStageProgress(state) {

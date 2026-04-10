@@ -13,14 +13,14 @@ export function startLesson(state, promptText) {
   state.lessonInProgress = true;
 
   state.chatEntries.push(createEntry("user", trimmed));
-
-  const firstParagraph = [
-    `Thanks for your prompt: “${trimmed}.”`,
-    "This response is simulated and pre-recorded for teaching, not live model inference.",
-    teachingSequence[0]
-  ].join(" ");
-
-  state.chatEntries.push(createEntry("assistant", firstParagraph));
+  state.chatEntries.push(createEntry("assistant", `Thanks for your prompt: “${trimmed}.”`));
+  state.chatEntries.push(
+    createEntry(
+      "assistant",
+      "This response is simulated and pre-recorded for teaching, not live model inference."
+    )
+  );
+  state.chatEntries.push(createEntry("assistant", teachingSequence[0]));
   return true;
 }
 

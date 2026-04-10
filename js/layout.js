@@ -2,17 +2,20 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
-export function detectOrientation() {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  return w >= 900 && w >= h ? "horizontal" : "vertical";
+function normalizeRect(rect, vw, vh) {
+  return {
+    left: rect.left / vw,
+    right: rect.right / vw,
+    top: rect.top / vh,
+    bottom: rect.bottom / vh,
+    width: rect.width / vw,
+    height: rect.height / vh
+  };
 }
 
-export function buildLayoutContext(state) {
-  const orientationMode = state.orientationMode;
+function fallbackLayout(state) {
   const split = state.verticalSplitRatio;
-
-  if (orientationMode === "horizontal") {
+  if (state.orientationMode === "horizontal") {
     return state.settingsOpen
       ? {
           focusX: 0.81,
@@ -31,6 +34,73 @@ export function buildLayoutContext(state) {
     focusY: split * 0.48,
     safeZone: { x: 0.08, y: 0.06, w: 0.84, h: Math.max(split - 0.09, 0.28) }
   };
+}
+
+function buildHorizontalContext(dom, vw, vh) {
+  const chatRect = dom.chatPanel?.getBoundingClientRect();
+  const settingsRect = dom.settingsPanel?.getBoundingClientRect();
+  if (!chatRect) return null;
+
+  const margin = 0.02;
+  const chat = normalizeRect(chatRect, vw, vh);
+  const settings = settingsRect ? normalizeRect(settingsRect, vw, vh) : null;
+
+  const usedRight = settings && settings.width > 0 ? Math.max(chat.right, settings.right) : chat.right;
+  const x = clamp(usedRight + margin, 0.03, 0.92);
+  const y = 0.06;
+  const w = clamp(1 - x - margin, 0.24, 0.9);
+  const h = 0.86;
+
+  return {
+    focusX: x + w * 0.52,
+    focusY: y + h * 0.44,
+    safeZone: { x, y, w, h }
+  };
+}
+
+function buildVerticalContext(state, dom, vw, vh) {
+  const margin = 0.05;
+
+  if (state.settingsOpen) {
+    return {
+      focusX: 0.5,
+      focusY: 0.5,
+      safeZone: { x: margin, y: margin, w: 1 - margin * 2, h: 1 - margin * 2 }
+    };
+  }
+
+  const chatRect = dom.chatPanel?.getBoundingClientRect();
+  if (!chatRect) return null;
+
+  const chat = normalizeRect(chatRect, vw, vh);
+  const y = margin;
+  const h = clamp(chat.top - margin * 1.6, 0.28, 0.86);
+
+  return {
+    focusX: 0.5,
+    focusY: y + h * 0.48,
+    safeZone: { x: margin, y, w: 1 - margin * 2, h }
+  };
+}
+
+export function detectOrientation() {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  return w >= 900 && w >= h ? "horizontal" : "vertical";
+}
+
+export function buildLayoutContext(state, dom = null) {
+  const vw = Math.max(window.innerWidth, 1);
+  const vh = Math.max(window.innerHeight, 1);
+
+  if (!dom) return fallbackLayout(state);
+
+  const context =
+    state.orientationMode === "horizontal"
+      ? buildHorizontalContext(dom, vw, vh)
+      : buildVerticalContext(state, dom, vw, vh);
+
+  return context ?? fallbackLayout(state);
 }
 
 export function applyLayoutToDom(state, dom) {
