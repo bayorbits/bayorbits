@@ -1,5 +1,5 @@
-import { lessonSteps } from "./copyRegistry.js";
-import { setStage } from "./stageMachine.js";
+import { placeholderLessonSteps, placeholderMessages } from "../content/placeholders.js";
+import { setStage } from "../sim/stageMachine.js";
 
 function createEntry(role, text) {
   if (role === "assistant") {
@@ -30,7 +30,7 @@ export function startLesson(state, promptText) {
   state.lessonInProgress = true;
 
   state.chatEntries.push(createEntry("user", trimmed));
-  addAssistantStep(state, lessonSteps[0]);
+  addAssistantStep(state, placeholderLessonSteps[0]);
   return true;
 }
 
@@ -38,16 +38,16 @@ export function continueLesson(state) {
   if (!state.lessonInProgress) return false;
   const next = state.currentLessonIndex + 1;
 
-  if (next >= lessonSteps.length) {
+  if (next >= placeholderLessonSteps.length) {
     state.lessonInProgress = false;
-    const done = createEntry("assistant", "Lesson complete. Submit a new prompt to run again.");
+    const done = createEntry("assistant", placeholderMessages.complete);
     revealEntryInstantly(done);
     state.chatEntries.push(done);
     return false;
   }
 
   state.currentLessonIndex = next;
-  addAssistantStep(state, lessonSteps[next]);
+  addAssistantStep(state, placeholderLessonSteps[next]);
   return true;
 }
 
@@ -85,7 +85,7 @@ export function renderChatLog(chatLog, entries) {
 }
 
 export function resetLesson(state) {
-  const resetText = "Reset complete. Enter a prompt to run the guided sequence again.";
+  const resetText = placeholderMessages.reset;
   state.currentPromptText = "";
   state.currentLessonIndex = -1;
   state.lessonInProgress = false;
