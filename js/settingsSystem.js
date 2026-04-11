@@ -12,8 +12,8 @@ export function renderSettings(panel) {
     <section class="settings-section" aria-label="Session status">
       <h3>Session Status</h3>
       <ul class="kv-list compact">
-        <li><strong>Orientation:</strong> <span data-status="orientation">-</span></li>
-        <li><strong>Layout:</strong> <span data-status="layout">-</span></li>
+        <li><strong>Viewport Mode:</strong> <span data-status="orientation">-</span></li>
+        <li><strong>Menu State:</strong> <span data-status="layout">-</span></li>
         <li><strong>Animation Stage:</strong> <span data-status="stage">idle</span></li>
         <li><strong>Token Units:</strong> <span data-status="tokens">0</span></li>
       </ul>
@@ -49,9 +49,9 @@ export function renderSettings(panel) {
       <h3>Controls</h3>
       <ul>
         <li><strong>Send / Start:</strong> submits prompt and starts staged flow.</li>
-        <li><strong>Continue:</strong> reveals the next single paragraph.</li>
+        <li><strong>Continue:</strong> reveals the next single paragraph and stage.</li>
         <li><strong>Pause:</strong> pauses or resumes stage animation.</li>
-        <li><strong>Reset:</strong> clears state and restores 50/50 split.</li>
+        <li><strong>Reset:</strong> clears state for a fresh lesson.</li>
       </ul>
     </section>
   `;
@@ -63,10 +63,8 @@ export function updateSettingsStatus(panel, state) {
     if (slot) slot.textContent = String(value);
   };
 
-  const layout = state.orientationMode === "horizontal" ? (state.settingsOpen ? "wide+settings" : "wide+chat") : state.settingsOpen ? "stacked settings" : "stacked split";
-
   setStatus("orientation", state.orientationMode);
-  setStatus("layout", layout);
+  setStatus("layout", state.settingsOpen ? "menu open" : "menu closed");
   setStatus("stage", state.currentAnimationStage);
   setStatus("tokens", state.promptGeometry?.nodes?.length ?? 0);
 }

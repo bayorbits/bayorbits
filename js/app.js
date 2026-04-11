@@ -1,10 +1,10 @@
 import { createInitialState } from "./state.js";
-import { detectOrientation, buildLayoutContext, applyLayoutToDom, updateVerticalSplitFromClientY } from "./layout.js";
+import { detectOrientation, buildLayoutContext, applyLayoutToDom } from "./layout.js";
 import { renderSettings, updateSettingsStatus } from "./settingsSystem.js";
 import { startLesson, continueLesson, renderChatLog, resetLesson, updateChatStreaming } from "./chatSystem.js";
 import { buildTokenUnits } from "./promptProcessor.js";
 import { buildPromptGeometry } from "./geometryBuilder.js";
-import { startStages, tickStages } from "./stageMachine.js";
+import { startStages, tickStages, getStageProgress } from "./stageMachine.js";
 import { computeFrame } from "./animationEngine.js";
 import { renderFrame } from "./renderer.js";
 
@@ -15,7 +15,6 @@ const dom = {
   uiRoot: document.getElementById("ui-root"),
   settingsPanel: document.getElementById("settings-panel"),
   chatPanel: document.getElementById("chat-panel"),
-  splitDivider: document.getElementById("split-divider"),
   settingsToggle: document.getElementById("settings-toggle"),
   chatLog: document.getElementById("chat-log"),
   promptInput: document.getElementById("prompt-input"),
@@ -30,12 +29,14 @@ let lastTick = performance.now();
 
 function resizeCanvas() {
   const ratio = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
-  const w = Math.floor(window.innerWidth * ratio);
-  const h = Math.floor(window.innerHeight * ratio);
-  if (dom.canvas.width !== w || dom.canvas.height !== h) {
-    dom.canvas.width = w;
-    dom.canvas.height = h;
+  const targetWidth = Math.max(1, Math.floor(dom.canvas.clientWidth * ratio));
+  const targetHeight = Math.max(1, Math.floor(dom.canvas.clientHeight * ratio));
+
+  if (dom.canvas.width !== targetWidth || dom.canvas.height !== targetHeight) {
+    dom.canvas.width = targetWidth;
+    dom.canvas.height = targetHeight;
   }
+
   ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
 }
 
@@ -48,7 +49,8 @@ function syncLayout() {
 function syncUi() {
   renderChatLog(dom.chatLog, state.chatEntries);
   const assistantStreaming = state.chatEntries.some((entry) => entry.role === "assistant" && entry.streaming);
-  dom.continueBtn.disabled = !state.lessonInProgress || assistantStreaming;
+  const stageSettled = !state.promptGeometry || getStageProgress(state) >= 0.99;
+  dom.continueBtn.disabled = !state.lessonInProgress || assistantStreaming || !stageSettled;
   dom.pauseBtn.textContent = state.animationRunning ? "Pause" : "Resume";
   dom.settingsToggle.setAttribute("aria-expanded", String(state.settingsOpen));
   updateSettingsStatus(dom.settingsPanel, state);
@@ -69,7 +71,6 @@ function beginRunFromPrompt() {
 }
 
 function resetAll() {
-  state.verticalSplitRatio = 0.5;
   state.settingsOpen = false;
   state.animationRunning = true;
   state.currentAnimationStage = "idle";
@@ -78,26 +79,6 @@ function resetAll() {
   resetLesson(state);
   syncLayout();
   syncUi();
-}
-
-function handleDividerDragStart(event) {
-  if (state.orientationMode !== "vertical" || state.settingsOpen) return;
-  state.dividerDragging = true;
-  const y = event.touches?.[0]?.clientY ?? event.clientY;
-  updateVerticalSplitFromClientY(state, y);
-  syncLayout();
-}
-
-function handleDividerDragMove(event) {
-  if (!state.dividerDragging) return;
-  event.preventDefault();
-  const y = event.touches?.[0]?.clientY ?? event.clientY;
-  updateVerticalSplitFromClientY(state, y);
-  syncLayout();
-}
-
-function handleDividerDragEnd() {
-  state.dividerDragging = false;
 }
 
 function animateFrame(now) {
@@ -150,28 +131,6 @@ function bindEvents() {
     if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
       beginRunFromPrompt();
-    }
-  });
-
-  dom.splitDivider.addEventListener("mousedown", handleDividerDragStart);
-  dom.splitDivider.addEventListener("touchstart", handleDividerDragStart, { passive: true });
-
-  window.addEventListener("mousemove", handleDividerDragMove);
-  window.addEventListener("touchmove", handleDividerDragMove, { passive: false });
-  window.addEventListener("mouseup", handleDividerDragEnd);
-  window.addEventListener("touchend", handleDividerDragEnd);
-
-  dom.splitDivider.addEventListener("keydown", (event) => {
-    if (state.orientationMode !== "vertical") return;
-    if (event.key === "ArrowUp") {
-      state.verticalSplitRatio = Math.max(0.25, state.verticalSplitRatio - 0.03);
-      syncLayout();
-      syncUi();
-    }
-    if (event.key === "ArrowDown") {
-      state.verticalSplitRatio = Math.min(0.75, state.verticalSplitRatio + 0.03);
-      syncLayout();
-      syncUi();
     }
   });
 }
