@@ -1,10 +1,8 @@
 export function createInitialState() {
   const welcomeText = "Welcome. This is a calm learning simulation with short guided steps.";
   return {
-    orientationMode: "horizontal",
+    orientationMode: "wide",
     settingsOpen: false,
-    verticalSplitRatio: 0.5,
-    dividerDragging: false,
     currentPromptText: "",
     currentLessonIndex: -1,
     lessonInProgress: false,
@@ -17,15 +15,15 @@ export function createInitialState() {
         streaming: false
       }
     ],
-    streamCharsPerSecond: 140,
+    streamCharsPerSecond: 170,
     animationRunning: true,
     currentAnimationStage: "idle",
     stageElapsedMs: 0,
     promptGeometry: null,
     layoutContext: {
-      focusX: 0.75,
-      focusY: 0.4,
-      safeZone: { x: 0, y: 0, w: 1, h: 1 }
+      focusX: 0.5,
+      focusY: 0.5,
+      safeZone: { x: 0.08, y: 0.12, w: 0.84, h: 0.76 }
     }
   };
 }

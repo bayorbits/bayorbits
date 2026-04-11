@@ -7,16 +7,12 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <canvas id="stage" aria-hidden="true"></canvas>
-
     <div id="ui-root" class="ui-root">
-      <aside id="settings-panel" class="glass-panel settings-panel" aria-label="Settings and reference"></aside>
-
-      <div id="split-divider" class="split-divider" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="Resize visualization and chat"></div>
+      <aside id="settings-panel" class="glass-panel settings-panel" aria-label="Settings and reference" aria-hidden="true"></aside>
 
       <section id="chat-panel" class="glass-panel chat-panel" aria-label="Simulated educational chat">
         <header class="chat-header">
-          <button id="settings-toggle" class="btn" type="button" aria-expanded="false">Settings</button>
+          <button id="settings-toggle" class="btn" type="button" aria-expanded="false" aria-controls="settings-panel">Menu</button>
           <div>
             <h1>LLM Star Chart</h1>
             <p class="subtitle">Educational simulation of chat and model-like geometry</p>
@@ -24,6 +20,11 @@
         </header>
 
         <div id="chat-log" class="chat-log" aria-live="polite"></div>
+
+        <section class="model-window" aria-label="Embedded educational model window">
+          <h2 class="sr-only">Model window</h2>
+          <canvas id="stage" aria-hidden="true"></canvas>
+        </section>
 
         <div class="composer-wrap">
           <label for="prompt-input" class="sr-only">Prompt input</label>
