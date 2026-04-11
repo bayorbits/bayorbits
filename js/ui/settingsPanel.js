@@ -16,7 +16,13 @@ export function renderSettings(panel) {
         <li><strong>Menu State:</strong> <span data-status="layout">-</span></li>
         <li><strong>Animation Stage:</strong> <span data-status="stage">idle</span></li>
         <li><strong>Token Units:</strong> <span data-status="tokens">0</span></li>
+        <li><strong>Primary Action:</strong> <span data-status="primary-action">Send</span></li>
       </ul>
+    </section>
+
+    <section class="settings-section" aria-label="Session actions">
+      <h3>Session Actions</h3>
+      <button id="new-chat-btn" class="btn" type="button">New chat</button>
     </section>
 
     <section class="settings-section" aria-label="Placeholder copy registry">
@@ -57,4 +63,5 @@ export function updateSettingsStatus(panel, state) {
   setStatus("layout", state.settingsOpen ? "menu open" : "menu closed");
   setStatus("stage", state.currentAnimationStage);
   setStatus("tokens", state.promptGeometry?.nodes?.length ?? 0);
+  setStatus("primary-action", state.responseStreamingActive ? "Stop" : "Send");
 }

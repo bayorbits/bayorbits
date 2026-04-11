@@ -1,22 +1,13 @@
-import { placeholderMessages } from "../content/placeholders.js";
-
 export function createInitialState() {
-  const welcomeText = placeholderMessages.welcome;
   return {
     orientationMode: "wide",
     settingsOpen: false,
     currentPromptText: "",
     currentLessonIndex: -1,
     lessonInProgress: false,
-    chatEntries: [
-      {
-        role: "assistant",
-        text: welcomeText,
-        revealIndex: welcomeText.length,
-        visibleText: welcomeText,
-        streaming: false
-      }
-    ],
+    responseStreamingActive: false,
+    streamingInterrupted: false,
+    chatEntries: [],
     streamCharsPerSecond: 170,
     animationRunning: true,
     currentAnimationStage: "idle",

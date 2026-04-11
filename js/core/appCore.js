@@ -1,10 +1,10 @@
 import { createInitialState } from "./state.js";
 import { detectOrientation, buildLayoutContext, applyLayoutToDom } from "../ui/layout.js";
 import { renderSettings, updateSettingsStatus } from "../ui/settingsPanel.js";
-import { startLesson, continueLesson, renderChatLog, resetLesson, updateChatStreaming } from "../flow/lessonFlow.js";
+import { startLesson, stopLessonResponse, renderChatLog, resetLesson, updateChatStreaming } from "../flow/lessonFlow.js";
 import { buildTokenUnits } from "../sim/promptProcessor.js";
 import { buildPromptGeometry } from "../sim/geometryBuilder.js";
-import { startStages, tickStages, getStageProgress } from "../sim/stageMachine.js";
+import { startStages, tickStages } from "../sim/stageMachine.js";
 import { computeFrame } from "../sim/animationEngine.js";
 import { renderFrame } from "../sim/renderer.js";
 
@@ -18,10 +18,7 @@ const dom = {
   settingsToggle: document.getElementById("settings-toggle"),
   chatLog: document.getElementById("chat-log"),
   promptInput: document.getElementById("prompt-input"),
-  sendBtn: document.getElementById("send-btn"),
-  continueBtn: document.getElementById("continue-btn"),
-  pauseBtn: document.getElementById("pause-btn"),
-  resetBtn: document.getElementById("reset-btn")
+  sendBtn: document.getElementById("send-btn")
 };
 
 const ctx = dom.canvas.getContext("2d", { alpha: true });
@@ -48,10 +45,8 @@ function syncLayout() {
 
 function syncUi() {
   renderChatLog(dom.chatLog, state.chatEntries);
-  const assistantStreaming = state.chatEntries.some((entry) => entry.role === "assistant" && entry.streaming);
-  const stageSettled = !state.promptGeometry || getStageProgress(state) >= 0.99;
-  dom.continueBtn.disabled = !state.lessonInProgress || assistantStreaming || !stageSettled;
-  dom.pauseBtn.textContent = state.animationRunning ? "Pause" : "Resume";
+  dom.sendBtn.textContent = state.responseStreamingActive ? "Stop" : "Send";
+  dom.promptInput.disabled = state.responseStreamingActive;
   dom.settingsToggle.setAttribute("aria-expanded", String(state.settingsOpen));
   updateSettingsStatus(dom.settingsPanel, state);
 }
@@ -70,13 +65,25 @@ function beginRunFromPrompt() {
   syncUi();
 }
 
+function onPrimaryAction() {
+  if (state.responseStreamingActive) {
+    stopLessonResponse(state);
+    syncUi();
+    return;
+  }
+
+  beginRunFromPrompt();
+}
+
 function resetAll() {
   state.settingsOpen = false;
-  state.animationRunning = true;
+  state.animationRunning = false;
   state.currentAnimationStage = "idle";
   state.stageElapsedMs = 0;
   state.promptGeometry = null;
   resetLesson(state);
+  dom.promptInput.value = "";
+  dom.promptInput.disabled = false;
   syncLayout();
   syncUi();
 }
@@ -86,8 +93,10 @@ function animateFrame(now) {
   const dt = now - lastTick;
   lastTick = now;
 
-  tickStages(state, dt);
-  const didStreamUpdate = updateChatStreaming(state, dt);
+  if (state.responseStreamingActive) {
+    tickStages(state, dt);
+  }
+  const didStreamUpdate = state.responseStreamingActive ? updateChatStreaming(state, dt) : false;
   const frame = computeFrame(state, now);
   renderFrame(ctx, dom.canvas, frame, state.layoutContext, now);
   if (didStreamUpdate) syncUi();
@@ -116,22 +125,20 @@ function bindEvents() {
     syncUi();
   });
 
-  dom.sendBtn.addEventListener("click", beginRunFromPrompt);
-  dom.continueBtn.addEventListener("click", () => {
-    continueLesson(state);
-    syncUi();
-  });
-  dom.pauseBtn.addEventListener("click", () => {
-    state.animationRunning = !state.animationRunning;
-    syncUi();
-  });
-  dom.resetBtn.addEventListener("click", resetAll);
+  dom.sendBtn.addEventListener("click", onPrimaryAction);
 
   dom.promptInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
-      beginRunFromPrompt();
+      onPrimaryAction();
     }
+  });
+
+  dom.settingsPanel.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    if (target.id !== "new-chat-btn") return;
+    resetAll();
   });
 }
 
