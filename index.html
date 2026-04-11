@@ -3,40 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LLM Star Chart</title>
+    <title>Bay Orbits</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div id="ui-root" class="ui-root">
-      <aside id="settings-panel" class="glass-panel settings-panel" aria-label="Settings and reference" aria-hidden="true"></aside>
-
-      <section id="chat-panel" class="glass-panel chat-panel" aria-label="Simulated educational chat">
-        <header class="chat-header">
-          <button id="settings-toggle" class="btn" type="button" aria-expanded="false" aria-controls="settings-panel">Menu</button>
-          <div>
-            <h1>LLM Star Chart</h1>
-            <p class="subtitle">Educational simulation of chat and model-like geometry</p>
-          </div>
-        </header>
-
-        <div id="chat-log" class="chat-log" aria-live="polite"></div>
-
-        <section class="model-window" aria-label="Embedded educational model window">
-          <h2 class="sr-only">Model window</h2>
-          <canvas id="stage" aria-hidden="true"></canvas>
-        </section>
-
-        <div class="composer-wrap">
-          <label for="prompt-input" class="sr-only">Prompt input</label>
-          <textarea id="prompt-input" rows="3" placeholder="Type a learning prompt to start the simulation..."></textarea>
-
-          <div class="control-cluster" aria-label="Simulation controls">
-            <button id="send-btn" class="btn btn-primary" type="button">Send</button>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <script type="module" src="js/app.js"></script>
+    <main class="splash-shell" aria-labelledby="bay-orbits-title">
+      <p class="splash-kicker">BayOrbits.ca</p>
+      <h1 id="bay-orbits-title">Bay Orbits</h1>
+      <p class="splash-copy">A calm educational interface lab for visual learning experiments.</p>
+    </main>
   </body>
 </html>
