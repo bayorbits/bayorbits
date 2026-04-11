@@ -2,7 +2,7 @@ export const placeholderLessonSteps = [
   {
     id: "acknowledgement",
     stage: "acknowledgement",
-    text: "Placeholder: prompt received. Use Continue to step through the simulation shell."
+    text: "Placeholder: prompt received. The educational simulation is now streaming."
   },
   {
     id: "simulation-note",
@@ -52,7 +52,5 @@ export const placeholderReferenceCopy = {
 };
 
 export const placeholderMessages = {
-  welcome: "Welcome. Placeholder lesson content is active while architecture is stabilized.",
-  reset: "Reset complete. Enter a prompt to rerun the placeholder sequence.",
   complete: "Placeholder sequence complete. Submit a new prompt to run again."
 };

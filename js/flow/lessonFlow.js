@@ -15,39 +15,50 @@ function revealEntryInstantly(entry) {
   entry.streaming = false;
 }
 
-function addAssistantStep(state, step) {
-  const entry = createEntry("assistant", step.text);
-  state.chatEntries.push(entry);
-  setStage(state, step.stage);
+function buildAssistantLessonText() {
+  return placeholderLessonSteps
+    .map((step, index) => `${index + 1}. ${step.text}`)
+    .join("\n\n");
+}
+
+function syncStageToRevealProgress(state, entry) {
+  if (!entry || entry.role !== "assistant") return;
+
+  const ratio = entry.text.length > 0 ? entry.revealIndex / entry.text.length : 0;
+  const stepIndex = Math.min(
+    placeholderLessonSteps.length - 1,
+    Math.floor(ratio * placeholderLessonSteps.length)
+  );
+  const nextStage = placeholderLessonSteps[Math.max(0, stepIndex)]?.stage ?? "response";
+  setStage(state, nextStage);
 }
 
 export function startLesson(state, promptText) {
   const trimmed = promptText.trim();
-  if (!trimmed) return false;
+  if (!trimmed || state.responseStreamingActive) return false;
 
   state.currentPromptText = trimmed;
   state.currentLessonIndex = 0;
   state.lessonInProgress = true;
+  state.responseStreamingActive = true;
+  state.streamingInterrupted = false;
 
   state.chatEntries.push(createEntry("user", trimmed));
-  addAssistantStep(state, placeholderLessonSteps[0]);
+  const assistantText = buildAssistantLessonText();
+  state.chatEntries.push(createEntry("assistant", assistantText));
+  setStage(state, placeholderLessonSteps[0].stage);
   return true;
 }
 
-export function continueLesson(state) {
-  if (!state.lessonInProgress) return false;
-  const next = state.currentLessonIndex + 1;
+export function stopLessonResponse(state) {
+  const activeEntry = state.chatEntries.find((entry) => entry.role === "assistant" && entry.streaming);
+  if (!activeEntry) return false;
 
-  if (next >= placeholderLessonSteps.length) {
-    state.lessonInProgress = false;
-    const done = createEntry("assistant", placeholderMessages.complete);
-    revealEntryInstantly(done);
-    state.chatEntries.push(done);
-    return false;
-  }
-
-  state.currentLessonIndex = next;
-  addAssistantStep(state, placeholderLessonSteps[next]);
+  activeEntry.streaming = false;
+  state.responseStreamingActive = false;
+  state.lessonInProgress = false;
+  state.animationRunning = false;
+  state.streamingInterrupted = true;
   return true;
 }
 
@@ -61,7 +72,19 @@ export function updateChatStreaming(state, dt) {
 
   activeEntry.revealIndex = nextIndex;
   activeEntry.visibleText = activeEntry.text.slice(0, nextIndex);
-  if (nextIndex >= activeEntry.text.length) activeEntry.streaming = false;
+  syncStageToRevealProgress(state, activeEntry);
+
+  if (nextIndex >= activeEntry.text.length) {
+    activeEntry.streaming = false;
+    state.lessonInProgress = false;
+    state.responseStreamingActive = false;
+    state.streamingInterrupted = false;
+
+    const done = createEntry("assistant", placeholderMessages.complete);
+    revealEntryInstantly(done);
+    state.chatEntries.push(done);
+    setStage(state, "response");
+  }
   return true;
 }
 
@@ -85,17 +108,10 @@ export function renderChatLog(chatLog, entries) {
 }
 
 export function resetLesson(state) {
-  const resetText = placeholderMessages.reset;
   state.currentPromptText = "";
   state.currentLessonIndex = -1;
   state.lessonInProgress = false;
-  state.chatEntries = [
-    {
-      role: "assistant",
-      text: resetText,
-      revealIndex: resetText.length,
-      visibleText: resetText,
-      streaming: false
-    }
-  ];
+  state.responseStreamingActive = false;
+  state.streamingInterrupted = false;
+  state.chatEntries = [];
 }
