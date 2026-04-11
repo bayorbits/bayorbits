@@ -1,5 +1,7 @@
+import { placeholderMessages } from "../content/placeholders.js";
+
 export function createInitialState() {
-  const welcomeText = "Welcome. This is a calm learning simulation with short guided steps.";
+  const welcomeText = placeholderMessages.welcome;
   return {
     orientationMode: "wide",
     settingsOpen: false,

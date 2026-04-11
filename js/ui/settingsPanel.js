@@ -1,4 +1,4 @@
-import { referenceCopy } from "./copyRegistry.js";
+import { placeholderReferenceCopy } from "../content/placeholders.js";
 
 export function renderSettings(panel) {
   panel.innerHTML = `
@@ -7,7 +7,7 @@ export function renderSettings(panel) {
       <button id="settings-close-btn" class="btn settings-close-btn" type="button" aria-label="Close settings panel">Close</button>
     </div>
 
-    <p class="settings-intro">Use this panel for stage reference and session status while the chat delivers one bite at a time.</p>
+    <p class="settings-intro">This panel shows shell status and placeholder reference copy for recovery-mode testing.</p>
 
     <section class="settings-section" aria-label="Session status">
       <h3>Session Status</h3>
@@ -19,15 +19,15 @@ export function renderSettings(panel) {
       </ul>
     </section>
 
-    <section class="settings-section" aria-label="Educational copy registry">
-      <h3>Educational Copy Registry</h3>
+    <section class="settings-section" aria-label="Placeholder copy registry">
+      <h3>Placeholder Copy Registry</h3>
       <ul class="kv-list">
-        <li><strong>Prompt.</strong> ${referenceCopy.prompt}</li>
-        <li><strong>Token.</strong> ${referenceCopy.token}</li>
-        <li><strong>Projection.</strong> ${referenceCopy.projection}</li>
-        <li><strong>Transformation.</strong> ${referenceCopy.transformation}</li>
-        <li><strong>Context / Influence.</strong> ${referenceCopy.contextInfluence}</li>
-        <li><strong>Response Formation.</strong> ${referenceCopy.responseFormation}</li>
+        <li><strong>Prompt.</strong> ${placeholderReferenceCopy.prompt}</li>
+        <li><strong>Token.</strong> ${placeholderReferenceCopy.token}</li>
+        <li><strong>Projection.</strong> ${placeholderReferenceCopy.projection}</li>
+        <li><strong>Transformation.</strong> ${placeholderReferenceCopy.transformation}</li>
+        <li><strong>Context / Influence.</strong> ${placeholderReferenceCopy.contextInfluence}</li>
+        <li><strong>Response Formation.</strong> ${placeholderReferenceCopy.responseFormation}</li>
       </ul>
     </section>
 
@@ -42,17 +42,7 @@ export function renderSettings(panel) {
 
     <section class="settings-section" aria-label="Honesty note">
       <h3>Honesty Note</h3>
-      <p>${referenceCopy.honesty}</p>
-    </section>
-
-    <section class="settings-section" aria-label="Controls">
-      <h3>Controls</h3>
-      <ul>
-        <li><strong>Send / Start:</strong> submits prompt and starts staged flow.</li>
-        <li><strong>Continue:</strong> reveals the next single paragraph and stage.</li>
-        <li><strong>Pause:</strong> pauses or resumes stage animation.</li>
-        <li><strong>Reset:</strong> clears state for a fresh lesson.</li>
-      </ul>
+      <p>${placeholderReferenceCopy.honesty}</p>
     </section>
   `;
 }
