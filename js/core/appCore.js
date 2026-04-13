@@ -43,17 +43,61 @@ function bindEvents(dom) {
   });
 }
 
-export function initApp() {
-  validateDomContract();
-  const dom = getDomRefs();
+function renderStartupFallback(message) {
+  const uiRoot = document.getElementById("ui-root");
+  if (!uiRoot) return;
+
+  uiRoot.innerHTML = `<p role="status">${message}</p>`;
+}
+
+function validateDom(dom) {
+  const requiredRefs = [
+    "canvas",
+    "uiRoot",
+    "settingsPanel",
+    "chatPanel",
+    "settingsToggle",
+    "chatLog",
+    "promptInput",
+    "sendBtn"
+  ];
+
+  for (const ref of requiredRefs) {
+    if (!dom?.[ref]) {
+      return { ok: false, reason: `Missing required DOM reference: dom.${ref}` };
+    }
+  }
+
   const ctx = dom.canvas.getContext("2d", { alpha: true });
   if (!ctx) {
-    throw new Error("Unable to initialize 2D rendering context for #stage canvas.");
+    return { ok: false, reason: "Unable to initialize 2D rendering context for #stage canvas." };
+  }
+
+  return { ok: true, ctx };
+}
+
+export function initApp() {
+  let dom;
+  try {
+    validateDomContract();
+    dom = getDomRefs();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown DOM initialization failure.";
+    console.error(`[appCore] Startup validation failed: ${message}`, error);
+    renderStartupFallback("Unable to start the star chart. Required interface elements are missing.");
+    return;
+  }
+
+  const validation = validateDom(dom);
+  if (!validation.ok) {
+    console.error(`[appCore] Startup validation failed: ${validation.reason}`);
+    renderStartupFallback("Unable to start the star chart. Rendering support is unavailable.");
+    return;
   }
 
   renderSettings(dom.settingsPanel);
   syncLayout(state, dom);
   syncUi(state, dom);
   bindEvents(dom);
-  startRenderLoop({ state, dom, ctx, syncUi });
+  startRenderLoop({ state, dom, ctx: validation.ctx, syncUi });
 }
