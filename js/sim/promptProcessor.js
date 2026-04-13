@@ -12,13 +12,17 @@ function hashToken(text) {
 }
 
 export function buildTokenUnits(promptText) {
-  const words = promptText
+  const tokens = promptText
     .split(/\s+/)
-    .map(cleanWord)
     .filter(Boolean)
+    .map((raw) => ({
+      raw,
+      cleaned: cleanWord(raw)
+    }))
+    .filter((token) => Boolean(token.cleaned))
     .slice(0, 64);
 
-  if (!words.length) {
+  if (!tokens.length) {
     return [
       {
         id: "empty_0",
@@ -34,25 +38,25 @@ export function buildTokenUnits(promptText) {
   }
 
   const counts = new Map();
-  for (const word of words) {
-    const key = word.toLowerCase();
+  for (const token of tokens) {
+    const key = token.cleaned.toLowerCase();
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
 
-  return words.map((word, index) => {
-    const normalized = word.toLowerCase();
+  return tokens.map((token, index) => {
+    const normalized = token.cleaned.toLowerCase();
     const repeated = (counts.get(normalized) ?? 0) > 1;
-    const punctuationBoost = /[!?]/.test(word) ? 0.2 : 0;
-    const lengthBoost = Math.min(word.length / 18, 0.5);
+    const punctuationBoost = /[!?]/.test(token.raw) ? 0.2 : 0; // Intentionally preserve raw punctuation for emphasis.
+    const lengthBoost = Math.min(token.cleaned.length / 18, 0.5);
     const hash = hashToken(`${normalized}_${index}`);
     const energy = Math.min(1, 0.2 + lengthBoost + punctuationBoost + (hash % 19) / 100);
 
     return {
       id: `${normalized}_${index}`,
-      text: word,
+      text: token.raw,
       normalized,
       index,
-      length: word.length,
+      length: token.cleaned.length,
       emphasis: punctuationBoost,
       repeated,
       energy
