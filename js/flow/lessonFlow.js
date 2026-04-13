@@ -1,5 +1,5 @@
 import { placeholderLessonSteps, placeholderMessages } from "../content/placeholders.js";
-import { setStage } from "../sim/stageMachine.js";
+import { getStageIndex, getStageOrder } from "../sim/stageMachine.js";
 
 function createEntry(role, text) {
   if (role === "assistant") {
@@ -21,16 +21,13 @@ function buildAssistantLessonText() {
     .join("\n\n");
 }
 
-function syncStageToRevealProgress(state, entry) {
-  if (!entry || entry.role !== "assistant") return;
+function getRevealCapForStage(state, entry) {
+  if (!entry || entry.role !== "assistant") return 0;
 
-  const ratio = entry.text.length > 0 ? entry.revealIndex / entry.text.length : 0;
-  const stepIndex = Math.min(
-    placeholderLessonSteps.length - 1,
-    Math.floor(ratio * placeholderLessonSteps.length)
-  );
-  const nextStage = placeholderLessonSteps[Math.max(0, stepIndex)]?.stage ?? "response";
-  setStage(state, nextStage);
+  const totalStages = Math.max(1, getStageOrder().length);
+  const stageIndex = getStageIndex(state.currentAnimationStage);
+  const stageRatio = (stageIndex + 1) / totalStages;
+  return Math.max(entry.revealIndex, Math.floor(entry.text.length * stageRatio));
 }
 
 export function startLesson(state, promptText) {
@@ -46,7 +43,6 @@ export function startLesson(state, promptText) {
   state.chatEntries.push(createEntry("user", trimmed));
   const assistantText = buildAssistantLessonText();
   state.chatEntries.push(createEntry("assistant", assistantText));
-  setStage(state, placeholderLessonSteps[0].stage);
   return true;
 }
 
@@ -67,12 +63,12 @@ export function updateChatStreaming(state, dt) {
   if (!activeEntry) return false;
 
   const chars = Math.max(1, Math.floor((state.streamCharsPerSecond * dt) / 1000));
-  const nextIndex = Math.min(activeEntry.text.length, activeEntry.revealIndex + chars);
+  const revealCap = getRevealCapForStage(state, activeEntry);
+  const nextIndex = Math.min(activeEntry.text.length, activeEntry.revealIndex + chars, revealCap);
   if (nextIndex === activeEntry.revealIndex) return false;
 
   activeEntry.revealIndex = nextIndex;
   activeEntry.visibleText = activeEntry.text.slice(0, nextIndex);
-  syncStageToRevealProgress(state, activeEntry);
 
   if (nextIndex >= activeEntry.text.length) {
     activeEntry.streaming = false;
@@ -83,7 +79,6 @@ export function updateChatStreaming(state, dt) {
     const done = createEntry("assistant", placeholderMessages.complete);
     revealEntryInstantly(done);
     state.chatEntries.push(done);
-    setStage(state, "response");
   }
   return true;
 }

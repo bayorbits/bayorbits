@@ -39,6 +39,28 @@ This pass prioritizes:
 - Animation math belongs in `js/sim/`.
 - `js/app.js` remains a stable entrypoint and should stay minimal.
 
+## Stage transition contract (`js/sim/stageMachine.js` + `js/flow/lessonFlow.js`)
+
+Canonical authority: **Option B (duration-based stage machine only)**.
+
+- `stageMachine.startStages(state)` always starts at `acknowledgement`.
+- `stageMachine.tickStages(state, dt)` is the only module allowed to advance animation stages.
+- Stages move only in this fixed order:
+  1. `acknowledgement`
+  2. `simulation-note`
+  3. `prompt`
+  4. `token`
+  5. `projection`
+  6. `transformation`
+  7. `context`
+  8. `response`
+- Transition rule: when elapsed time for a stage reaches that stage duration, transition to the next stage and reset elapsed to `0`.
+- Terminal rule: `response` is terminal; once its duration completes, animation stops.
+- Non-canonical path removed: lesson flow does not set animation stage directly.
+- `lessonFlow.updateChatStreaming(state, dt)` consumes current stage state and only reveals text up to the currently reached stage ratio.
+
+This keeps stage ownership in `js/sim/` and keeps streaming UI as a consumer of stage events.
+
 ## Deferred concerns
 
 - final authored educational copy,
