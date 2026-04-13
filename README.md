@@ -67,3 +67,12 @@ Open <http://localhost:8000> and verify:
 - Keep behavior in `js/flow`, `js/sim`, and `js/ui`.
 - Keep entrypoint thin; route wiring through `js/core/appCore.js`.
 - Avoid framework migration and avoid adding persistence or backend concerns.
+
+## Licensing model
+
+This project is intended to use a two-track licensing model:
+
+- **Default public track:** AGPLv3 (copyleft)
+- **Commercial track:** separate proprietary commercial license from Bay Orbits
+
+See `docs/licensing-two-track-model.md` for the implementation-ready system definition.
