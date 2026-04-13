@@ -45,25 +45,6 @@ body {
   color: var(--muted);
 }
 
-.disclaimer {
-  margin-top: 1rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid var(--panel-border);
-  border-radius: 12px;
-  background: rgba(8, 14, 25, 0.45);
-}
-
-.disclaimer h2 {
-  margin: 0 0 0.5rem;
-  font-size: 1rem;
-}
-
-.disclaimer p {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.45;
-}
-
 .ui-root {
   position: relative;
   min-height: 100dvh;
