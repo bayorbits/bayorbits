@@ -61,6 +61,21 @@ Open <http://localhost:8000> and verify:
 - Send/Continue/Pause/Reset do not throw startup errors,
 - placeholder lesson text appears in chat/settings (not authored final copy).
 
+
+## Licensing
+
+Bay Orbits uses a **two-track license model**:
+
+- **Default:** GNU GPLv3 (`LICENSE`)
+- **Alternative:** paid proprietary commercial license (`COMMERCIAL_LICENSE.md`)
+
+Quick path:
+- Use under GPLv3 if you can comply with copyleft obligations.
+- Obtain a commercial license if you need closed-source/proprietary distribution rights.
+
+For plain-language guidance, start with [`LICENSE.md`](./LICENSE.md).
+For commercial licensing, contact **licensing@bayorbits.com**.
+
 ## Guardrails for future passes
 
 - Keep content data in `js/content/`.
