@@ -145,16 +145,16 @@ export function renderChatLog(chatLog, entries) {
     renderState.renderedEntries.push({ entry, textNode });
   }
 
-  const activeStreaming = renderState.renderedEntries.find((item) => item.entry.role === "assistant" && item.entry.streaming) ?? null;
-  renderState.activeStreamingEntry = activeStreaming?.entry ?? null;
-  renderState.activeStreamingTextNode = activeStreaming?.textNode ?? null;
-
   if (renderState.activeStreamingEntry && renderState.activeStreamingTextNode) {
     const nextText = getEntryText(renderState.activeStreamingEntry);
     if (renderState.activeStreamingTextNode.nodeValue !== nextText) {
       renderState.activeStreamingTextNode.nodeValue = nextText;
     }
   }
+
+  const activeStreaming = renderState.renderedEntries.find((item) => item.entry.role === "assistant" && item.entry.streaming) ?? null;
+  renderState.activeStreamingEntry = activeStreaming?.entry ?? null;
+  renderState.activeStreamingTextNode = activeStreaming?.textNode ?? null;
 
   chatRenderState.set(chatLog, renderState);
   if (shouldAutoscroll) {
