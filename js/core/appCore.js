@@ -45,9 +45,19 @@ function bindEvents(dom) {
 
 function renderStartupFallback(message) {
   const uiRoot = document.getElementById("ui-root");
-  if (!uiRoot) return;
+  if (uiRoot) {
+    uiRoot.innerHTML = `<p role="status">${message}</p>`;
+    return;
+  }
 
-  uiRoot.innerHTML = `<p role="status">${message}</p>`;
+  const status = document.createElement("p");
+  status.setAttribute("role", "status");
+  status.textContent = message;
+  status.style.margin = "1rem";
+  status.style.fontFamily = "system-ui, sans-serif";
+  status.style.fontSize = "0.95rem";
+
+  document.body.appendChild(status);
 }
 
 function validateDom(dom) {
