@@ -1,6 +1,9 @@
 import { placeholderLessonSteps, placeholderMessages } from "../content/placeholders.js";
 import { getStageIndex, getStageOrder } from "../sim/stageMachine.js";
 
+const CHAT_AUTOSCROLL_THRESHOLD_PX = 48;
+const chatRenderState = new WeakMap();
+
 function createEntry(role, text) {
   if (role === "assistant") {
     return { role, text, revealIndex: 0, visibleText: "", streaming: true };
@@ -83,23 +86,80 @@ export function updateChatStreaming(state, dt) {
   return true;
 }
 
+function isNearBottom(chatLog) {
+  const distanceFromBottom = chatLog.scrollHeight - chatLog.scrollTop - chatLog.clientHeight;
+  return distanceFromBottom <= CHAT_AUTOSCROLL_THRESHOLD_PX;
+}
+
+function createChatEntryNode(entry) {
+  const wrapper = document.createElement("article");
+  wrapper.className = `chat-entry ${entry.role}`;
+
+  const role = document.createElement("div");
+  role.className = "role";
+  role.textContent = entry.role;
+
+  const text = document.createElement("p");
+  const textNode = document.createTextNode("");
+  text.appendChild(textNode);
+
+  wrapper.append(role, text);
+  return { wrapper, textNode };
+}
+
+function getEntryText(entry) {
+  return entry.role === "assistant" ? entry.visibleText ?? entry.text : entry.text;
+}
+
+function createChatRenderState() {
+  return {
+    renderedEntries: [],
+    activeStreamingEntry: null,
+    activeStreamingTextNode: null
+  };
+}
+
 export function renderChatLog(chatLog, entries) {
-  chatLog.innerHTML = "";
-  for (const entry of entries) {
-    const wrapper = document.createElement("article");
-    wrapper.className = `chat-entry ${entry.role}`;
+  const shouldAutoscroll = isNearBottom(chatLog);
+  const renderState = chatRenderState.get(chatLog) ?? createChatRenderState();
 
-    const role = document.createElement("div");
-    role.className = "role";
-    role.textContent = entry.role;
-
-    const text = document.createElement("p");
-    text.textContent = entry.role === "assistant" ? entry.visibleText ?? entry.text : entry.text;
-
-    wrapper.append(role, text);
-    chatLog.appendChild(wrapper);
+  if (entries.length === 0) {
+    chatLog.innerHTML = "";
+    renderState.renderedEntries = [];
+    renderState.activeStreamingEntry = null;
+    renderState.activeStreamingTextNode = null;
+    chatRenderState.set(chatLog, renderState);
+    return;
   }
-  chatLog.scrollTop = chatLog.scrollHeight;
+
+  while (renderState.renderedEntries.length > entries.length) {
+    chatLog.lastElementChild?.remove();
+    renderState.renderedEntries.pop();
+  }
+
+  for (let index = renderState.renderedEntries.length; index < entries.length; index += 1) {
+    const entry = entries[index];
+    const { wrapper, textNode } = createChatEntryNode(entry);
+    textNode.nodeValue = getEntryText(entry);
+    chatLog.appendChild(wrapper);
+    renderState.renderedEntries.push({ entry, textNode });
+  }
+
+  const activeStreaming = renderState.renderedEntries.find((item) => item.entry.role === "assistant" && item.entry.streaming) ?? null;
+  renderState.activeStreamingEntry = activeStreaming?.entry ?? null;
+  renderState.activeStreamingTextNode = activeStreaming?.textNode ?? null;
+
+  if (renderState.activeStreamingEntry && renderState.activeStreamingTextNode) {
+    const nextText = getEntryText(renderState.activeStreamingEntry);
+    if (renderState.activeStreamingTextNode.nodeValue !== nextText) {
+      renderState.activeStreamingTextNode.nodeValue = nextText;
+    }
+  }
+
+  chatRenderState.set(chatLog, renderState);
+  if (shouldAutoscroll) {
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
 }
 
 export function resetLesson(state) {
