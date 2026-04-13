@@ -10,28 +10,58 @@ const stageDuration = {
   response: 2300
 };
 
-export function startStages(state) {
-  state.currentAnimationStage = "acknowledgement";
+const stageTransition = {
+  acknowledgement: "simulation-note",
+  "simulation-note": "prompt",
+  prompt: "token",
+  token: "projection",
+  projection: "transformation",
+  transformation: "context",
+  context: "response",
+  response: "response"
+};
+
+const stageOrder = Object.keys(stageTransition);
+
+function transitionToStage(state, stage) {
+  if (!stage) return;
+  state.currentAnimationStage = stage;
   state.stageElapsedMs = 0;
 }
 
-export function setStage(state, stage) {
-  if (!stage || state.currentAnimationStage === stage) return;
-  state.currentAnimationStage = stage;
-  state.stageElapsedMs = 0;
+export function startStages(state) {
+  transitionToStage(state, stageOrder[0]);
   state.animationRunning = true;
 }
 
 export function tickStages(state, dt) {
   if (!state.animationRunning || !state.promptGeometry) return;
 
-  const stage = state.currentAnimationStage;
-  const duration = stageDuration[stage] ?? 2000;
-  state.stageElapsedMs += dt;
+  let stage = state.currentAnimationStage;
+  let elapsed = state.stageElapsedMs + dt;
 
-  if (state.stageElapsedMs >= duration) {
-    state.stageElapsedMs = duration;
-    if (stage === "response") state.animationRunning = false;
+  while (true) {
+    const duration = stageDuration[stage] ?? 2000;
+
+    if (!Number.isFinite(duration)) {
+      state.stageElapsedMs = 0;
+      return;
+    }
+
+    if (elapsed < duration) {
+      state.stageElapsedMs = elapsed;
+      return;
+    }
+
+    if (stage === "response") {
+      state.stageElapsedMs = duration;
+      state.animationRunning = false;
+      return;
+    }
+
+    elapsed -= duration;
+    stage = stageTransition[stage] ?? "response";
+    transitionToStage(state, stage);
   }
 }
 
@@ -40,4 +70,12 @@ export function getStageProgress(state) {
   const duration = stageDuration[stage] ?? 1;
   if (!Number.isFinite(duration)) return 0;
   return Math.min(state.stageElapsedMs / duration, 1);
+}
+
+export function getStageOrder() {
+  return stageOrder;
+}
+
+export function getStageIndex(stage) {
+  return Math.max(0, stageOrder.indexOf(stage));
 }
