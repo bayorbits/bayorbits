@@ -20,6 +20,50 @@ body {
   color: var(--text);
 }
 
+.splash-shell {
+  min-height: 100dvh;
+  display: grid;
+  align-content: center;
+  gap: 0.7rem;
+  width: min(760px, calc(100vw - 2rem));
+  margin: 0 auto;
+}
+
+.splash-kicker {
+  margin: 0;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.splash-shell h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3.2vw, 2.5rem);
+}
+
+.splash-copy {
+  margin: 0;
+  color: var(--muted);
+}
+
+.disclaimer {
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  background: rgba(8, 14, 25, 0.45);
+}
+
+.disclaimer h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.disclaimer p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
 .ui-root {
   position: relative;
   min-height: 100dvh;
