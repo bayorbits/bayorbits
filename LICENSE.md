@@ -5,7 +5,7 @@ Bay Orbits is offered under a **two-track licensing model** designed for clarity
 1. **Public Track (default): GNU GPLv3**
 2. **Commercial Track (paid): proprietary commercial license**
 
-This repository uses GPLv3 as the default because Bay Orbits is a static, client-side project with no backend/SaaS service layer. GPLv3 provides clear copyleft obligations for distributed derivatives without adding network-use terms that AGPLv3 is primarily designed to address.
+This repository uses GPLv3 as the default because Bay Orbits is a static, client-side project with no backend/SaaS service layer. GPLv3 provides clear copyleft obligations for distributed derivatives without adding additional network-use clauses beyond GPLv3 distribution requirements.
 
 ## Two-track model
 

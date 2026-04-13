@@ -87,7 +87,7 @@ For commercial licensing, contact **licensing@bayorbits.com**.
 
 This project is intended to use a two-track licensing model:
 
-- **Default public track:** AGPLv3 (copyleft)
+- **Default public track:** GPLv3 (copyleft)
 - **Commercial track:** separate proprietary commercial license from Bay Orbits
 
 See `docs/licensing-two-track-model.md` for the implementation-ready system definition.
