@@ -1,0 +1,41 @@
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Gamified Pattern Matcher",
+  "identifier": "index",
+  "dependencies": {
+    "css": "./index.css",
+    "js": "./index.js"
+  },
+  "ui": {
+    "main": { "id": "app", "role": "main" },
+    "children": [
+      {
+        "header": { "id": "ui-header", "role": "banner" },
+        "children": [
+          { "h1": { "id": "app-title" }, "children": ["Pattern Matching Engine"] },
+          { "p": { "id": "level-indicator", "aria-live": "polite" }, "children": ["Level: 0 (2x2 Grid)"] },
+          { "p": { "id": "score-tracker", "aria-live": "polite" }, "children": ["Score: 0 | High Score: 0"] },
+          { "button": { "id": "btn-fullscreen", "type": "button" }, "children": ["Toggle Fullscreen"] },
+          { "button": { "id": "btn-start-reset", "type": "button" }, "children": ["Start Game"] }
+        ]
+      },
+      {
+        "section": { "id": "game-grid-container", "aria-label": "Pattern Matcher Grid" },
+        "children": [
+          { "button": { "id": "cell-0", "type": "button", "data-grid-index": "0", "disabled": "true", "aria-pressed": "false" }, "children": ["Cell 1"] },
+          { "button": { "id": "cell-1", "type": "button", "data-grid-index": "1", "disabled": "true", "aria-pressed": "false" }, "children": ["Cell 2"] },
+          { "button": { "id": "cell-2", "type": "button", "data-grid-index": "2", "disabled": "true", "aria-pressed": "false" }, "children": ["Cell 3"] },
+          { "button": { "id": "cell-3", "type": "button", "data-grid-index": "3", "disabled": "true", "aria-pressed": "false" }, "children": ["Cell 4"] }
+        ]
+      },
+      {
+        "footer": { "id": "ui-footer", "role": "contentinfo" },
+        "children": [
+          { "p": { "id": "status-message", "aria-live": "assertive" }, "children": ["Status: Ready. Press 'Start Game' to begin."] },
+          { "small": { "id": "instructions-text" }, "children": ["Instructions: Repeat the visual pattern sequence using mouse clicks or touches."] }
+        ]
+      }
+    ]
+  }
+}
